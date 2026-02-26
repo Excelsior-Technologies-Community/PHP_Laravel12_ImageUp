@@ -1,7 +1,11 @@
 #  PHP_Laravel12_ImageUp
 
-![Laravel](https://img.shields.io/badge/Laravel-12-red)
-![PHP](https://img.shields.io/badge/PHP-8.2%2B-blue)
+<p align="center">
+<a href="#"><img src="https://img.shields.io/badge/Laravel-12-red" alt="Laravel Version"></a>
+<a href="#"><img src="https://img.shields.io/badge/PHP-8.2%2B-blue" alt="PHP Version"></a>
+<a href="#"><img src="https://img.shields.io/badge/Image-Upload%20%26%20Resize-success" alt="Image Upload"></a>
+<a href="#"><img src="https://img.shields.io/badge/Intervention-Image-orange" alt="Intervention Image"></a>
+</p>
 
 ---
 
