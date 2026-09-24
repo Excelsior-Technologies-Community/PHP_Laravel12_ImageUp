@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use Illuminate\Support\Str;
 use Intervention\Image\ImageManagerStatic as Image;
 
 trait HasImageUpload
@@ -10,22 +11,48 @@ trait HasImageUpload
     {
         static::saving(function ($model) {
 
-            // check image exists
+            /*
+             * Check whether an image was uploaded.
+             */
             if (request()->hasFile('image')) {
 
                 $file = request()->file('image');
 
-                $filename = time().'.'.$file->getClientOriginalExtension();
+                /*
+                 * Generate a unique filename.
+                 */
+                $filename = Str::uuid() . '.' .
+                    $file->getClientOriginalExtension();
 
-                $destination = public_path('uploads/'.$filename);
+                /*
+                 * Destination directory.
+                 */
+                $uploadDirectory = public_path('uploads');
 
-                // resize image automatically
+                /*
+                 * Create directory if it does not exist.
+                 */
+                if (!is_dir($uploadDirectory)) {
+                    mkdir(
+                        $uploadDirectory,
+                        0755,
+                        true
+                    );
+                }
+
+                $destination = $uploadDirectory . '/' . $filename;
+
+                /*
+                 * Resize image to 400 x 400.
+                 */
                 Image::make($file)
                     ->resize(400, 400)
-                    ->save($destination);
+                    ->save($destination, 80);
 
-                // save path in DB
-                $model->image = 'uploads/'.$filename;
+                /*
+                 * Save relative image path.
+                 */
+                $model->image = 'uploads/' . $filename;
             }
         });
     }
