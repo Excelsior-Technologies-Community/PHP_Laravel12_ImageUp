@@ -24,46 +24,44 @@
             font-family: "Segoe UI", Arial, sans-serif;
         }
 
-        .navbar-brand {
-            font-weight: 700;
-        }
-
         .dashboard-container {
-            max-width: 1200px;
+            max-width: 1250px;
             margin: 35px auto;
         }
 
         .stat-card {
             border: none;
             border-radius: 15px;
-            padding: 25px;
+            padding: 22px;
             background: #ffffff;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.07);
+            box-shadow: 0 5px 20px rgba(0,0,0,.07);
             height: 100%;
         }
 
         .stat-title {
             color: #6c757d;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             text-transform: uppercase;
         }
 
         .stat-value {
-            font-size: 32px;
+            font-size: 30px;
             font-weight: 700;
             margin-top: 8px;
         }
 
         .upload-card,
-        .products-card {
+        .products-card,
+        .filter-card {
             border: none;
             border-radius: 15px;
             background: #ffffff;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.07);
+            box-shadow: 0 5px 20px rgba(0,0,0,.07);
         }
 
-        .upload-card {
+        .upload-card,
+        .filter-card {
             padding: 25px;
         }
 
@@ -72,14 +70,13 @@
             border-radius: 15px;
             overflow: hidden;
             background: #ffffff;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 15px rgba(0,0,0,.08);
             height: 100%;
-            transition: 0.25s;
+            transition: .25s;
         }
 
         .product-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
         }
 
         .product-image {
@@ -117,38 +114,31 @@
             border: 2px solid #ddd;
         }
 
-        .section-title {
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-
-        .filter-card {
-            background: #ffffff;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
-        }
-
-        .latest-image {
-            width: 70px;
-            height: 70px;
-            object-fit: cover;
-            border-radius: 10px;
-        }
-
-        .pagination {
-            margin-top: 25px;
-        }
-
         .empty-state {
             padding: 50px 20px;
             text-align: center;
             color: #777;
         }
 
+        .filter-section {
+            border: 1px solid #e5e5e5;
+            border-radius: 10px;
+            padding: 15px;
+            background: #fafafa;
+        }
+
+        .pagination {
+            margin-top: 25px;
+        }
+
+        .missing-badge {
+            font-size: 11px;
+        }
+
     </style>
 
 </head>
+
 
 <body>
 
@@ -157,10 +147,17 @@
     <div class="container">
 
         <a
-            class="navbar-brand"
+            class="navbar-brand fw-bold"
             href="{{ route('products.index') }}"
         >
             🖼️ Image Upload Manager
+        </a>
+
+        <a
+            href="{{ route('products.gallery') }}"
+            class="btn btn-light btn-sm"
+        >
+            🗂️ Gallery
         </a>
 
     </div>
@@ -170,7 +167,8 @@
 
 <div class="container dashboard-container">
 
-    {{-- Success Message --}}
+    {{-- Success --}}
+
     @if(session('success'))
 
         <div class="alert alert-success alert-dismissible fade show">
@@ -188,7 +186,27 @@
     @endif
 
 
-    {{-- Validation Errors --}}
+    {{-- Error --}}
+
+    @if(session('error'))
+
+        <div class="alert alert-danger alert-dismissible fade show">
+
+            {{ session('error') }}
+
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+            ></button>
+
+        </div>
+
+    @endif
+
+
+    {{-- Validation --}}
+
     @if($errors->any())
 
         <div class="alert alert-danger">
@@ -210,17 +228,17 @@
     @endif
 
 
-    {{-- ========================================= --}}
-    {{-- ANALYTICS DASHBOARD --}}
-    {{-- ========================================= --}}
+    {{-- ================================================= --}}
+    {{-- STATISTICS --}}
+    {{-- ================================================= --}}
 
-    <h3 class="section-title">
+    <h3 class="fw-bold mb-4">
         📊 Image Upload Analytics
     </h3>
 
+
     <div class="row g-4 mb-4">
 
-        {{-- Total Images --}}
         <div class="col-md-3">
 
             <div class="stat-card">
@@ -234,7 +252,7 @@
                 </div>
 
                 <small class="text-muted">
-                    All uploaded product images
+                    All uploaded images
                 </small>
 
             </div>
@@ -242,7 +260,6 @@
         </div>
 
 
-        {{-- Today's Images --}}
         <div class="col-md-3">
 
             <div class="stat-card">
@@ -256,7 +273,7 @@
                 </div>
 
                 <small class="text-muted">
-                    Images uploaded today
+                    Today's uploads
                 </small>
 
             </div>
@@ -264,7 +281,6 @@
         </div>
 
 
-        {{-- Monthly Images --}}
         <div class="col-md-3">
 
             <div class="stat-card">
@@ -278,7 +294,7 @@
                 </div>
 
                 <small class="text-muted">
-                    Current month uploads
+                    Current month
                 </small>
 
             </div>
@@ -286,36 +302,21 @@
         </div>
 
 
-        {{-- Latest Product --}}
         <div class="col-md-3">
 
             <div class="stat-card">
 
                 <div class="stat-title">
-                    Latest Upload
+                    Storage Used
                 </div>
 
-                @if($latestProduct)
+                <div class="stat-value text-info">
+                    {{ $storageFormatted }}
+                </div>
 
-                    <div class="mt-2 fw-bold">
-
-                        {{ $latestProduct->name }}
-
-                    </div>
-
-                    <small class="text-muted">
-
-                        {{ $latestProduct->created_at->format('d M Y, h:i A') }}
-
-                    </small>
-
-                @else
-
-                    <div class="text-muted mt-2">
-                        No uploads yet
-                    </div>
-
-                @endif
+                <small class="text-muted">
+                    Physical image storage
+                </small>
 
             </div>
 
@@ -324,15 +325,16 @@
     </div>
 
 
-    {{-- ========================================= --}}
-    {{-- UPLOAD FORM --}}
-    {{-- ========================================= --}}
+    {{-- ================================================= --}}
+    {{-- UPLOAD --}}
+    {{-- ================================================= --}}
 
     <div class="upload-card mb-4">
 
-        <h3 class="section-title">
+        <h3 class="fw-bold mb-4">
             📤 Upload New Product Image
         </h3>
+
 
         <form
             method="POST"
@@ -341,6 +343,7 @@
         >
 
             @csrf
+
 
             <div class="row">
 
@@ -378,7 +381,7 @@
                     >
 
                     <small class="text-muted">
-                        JPG, JPEG, PNG, GIF or WEBP | Maximum 5MB
+                        JPG, JPEG, PNG, GIF, WEBP | Maximum 5MB
                     </small>
 
                 </div>
@@ -386,20 +389,19 @@
             </div>
 
 
-            {{-- Image Preview --}}
             <div
                 class="preview-container"
                 id="previewContainer"
             >
 
-                <p class="fw-bold mb-2">
+                <p class="fw-bold">
                     Image Preview
                 </p>
 
                 <img
                     id="previewImage"
                     class="preview-image"
-                    alt="Image Preview"
+                    alt="Preview"
                 >
 
             </div>
@@ -417,15 +419,16 @@
     </div>
 
 
-    {{-- ========================================= --}}
-    {{-- SEARCH + FILTER --}}
-    {{-- ========================================= --}}
+    {{-- ================================================= --}}
+    {{-- FILTER --}}
+    {{-- ================================================= --}}
 
     <div class="filter-card mb-4">
 
         <h5 class="fw-bold mb-3">
-            🔎 Search & Filter Images
+            🔎 Advanced Search & Filters
         </h5>
+
 
         <form
             method="GET"
@@ -434,27 +437,31 @@
 
             <div class="row g-3">
 
-                <div class="col-md-6">
+                {{-- Search --}}
+
+                <div class="col-md-4">
 
                     <label class="form-label">
-                        Search Product
+                        Product Name
                     </label>
 
                     <input
                         type="text"
                         name="search"
                         class="form-control"
-                        placeholder="Search by product name..."
+                        placeholder="Search..."
                         value="{{ $search }}"
                     >
 
                 </div>
 
 
+                {{-- Period --}}
+
                 <div class="col-md-4">
 
                     <label class="form-label">
-                        Upload Period
+                        Quick Period
                     </label>
 
                     <select
@@ -499,74 +506,333 @@
                 </div>
 
 
-                <div class="col-md-2 d-flex align-items-end">
+                {{-- Format --}}
 
-                    <div class="w-100">
+                <div class="col-md-4">
 
-                        <button
-                            type="submit"
-                            class="btn btn-dark w-100"
+                    <label class="form-label">
+                        Image Format
+                    </label>
+
+                    <select
+                        name="format"
+                        class="form-select"
+                    >
+
+                        <option value="">
+                            All Formats
+                        </option>
+
+                        <option
+                            value="jpg"
+                            {{ $format === 'jpg' ? 'selected' : '' }}
                         >
-                            Search
-                        </button>
+                            JPG
+                        </option>
 
-                    </div>
+                        <option
+                            value="jpeg"
+                            {{ $format === 'jpeg' ? 'selected' : '' }}
+                        >
+                            JPEG
+                        </option>
+
+                        <option
+                            value="png"
+                            {{ $format === 'png' ? 'selected' : '' }}
+                        >
+                            PNG
+                        </option>
+
+                        <option
+                            value="gif"
+                            {{ $format === 'gif' ? 'selected' : '' }}
+                        >
+                            GIF
+                        </option>
+
+                        <option
+                            value="webp"
+                            {{ $format === 'webp' ? 'selected' : '' }}
+                        >
+                            WEBP
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                {{-- From Date --}}
+
+                <div class="col-md-3">
+
+                    <label class="form-label">
+                        From Date
+                    </label>
+
+                    <input
+                        type="date"
+                        name="date_from"
+                        class="form-control"
+                        value="{{ $dateFrom }}"
+                    >
+
+                </div>
+
+
+                {{-- To Date --}}
+
+                <div class="col-md-3">
+
+                    <label class="form-label">
+                        To Date
+                    </label>
+
+                    <input
+                        type="date"
+                        name="date_to"
+                        class="form-control"
+                        value="{{ $dateTo }}"
+                    >
+
+                </div>
+
+
+                {{-- Min Size --}}
+
+                <div class="col-md-3">
+
+                    <label class="form-label">
+                        Min Size (KB)
+                    </label>
+
+                    <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        name="min_size"
+                        class="form-control"
+                        placeholder="Example: 10"
+                        value="{{ $minSize }}"
+                    >
+
+                </div>
+
+
+                {{-- Max Size --}}
+
+                <div class="col-md-3">
+
+                    <label class="form-label">
+                        Max Size (KB)
+                    </label>
+
+                    <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        name="max_size"
+                        class="form-control"
+                        placeholder="Example: 500"
+                        value="{{ $maxSize }}"
+                    >
+
+                </div>
+
+
+                {{-- Sort --}}
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Sort By
+                    </label>
+
+                    <select
+                        name="sort"
+                        class="form-select"
+                    >
+
+                        <option
+                            value="latest"
+                            {{ $sort === 'latest' ? 'selected' : '' }}
+                        >
+                            Newest First
+                        </option>
+
+                        <option
+                            value="oldest"
+                            {{ $sort === 'oldest' ? 'selected' : '' }}
+                        >
+                            Oldest First
+                        </option>
+
+                        <option
+                            value="id_asc"
+                            {{ $sort === 'id_asc' ? 'selected' : '' }}
+                        >
+                            ID Ascending
+                        </option>
+
+                        <option
+                            value="id_desc"
+                            {{ $sort === 'id_desc' ? 'selected' : '' }}
+                        >
+                            ID Descending
+                        </option>
+
+                        <option
+                            value="name_asc"
+                            {{ $sort === 'name_asc' ? 'selected' : '' }}
+                        >
+                            Name A-Z
+                        </option>
+
+                        <option
+                            value="name_desc"
+                            {{ $sort === 'name_desc' ? 'selected' : '' }}
+                        >
+                            Name Z-A
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                {{-- Per Page --}}
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+                        Products Per Page
+                    </label>
+
+                    <select
+                        name="per_page"
+                        class="form-select"
+                    >
+
+                        @foreach([6,12,24,48] as $number)
+
+                            <option
+                                value="{{ $number }}"
+                                {{ $perPage == $number ? 'selected' : '' }}
+                            >
+                                {{ $number }} Products
+                            </option>
+
+                        @endforeach
+
+                    </select>
+
+                </div>
+
+
+                {{-- Buttons --}}
+
+                <div class="col-md-4 d-flex align-items-end gap-2">
+
+                    <button
+                        type="submit"
+                        class="btn btn-dark flex-fill"
+                    >
+                        🔎 Apply Filters
+                    </button>
+
+                    <a
+                        href="{{ route('products.index') }}"
+                        class="btn btn-outline-secondary"
+                    >
+                        Reset
+                    </a>
 
                 </div>
 
             </div>
 
-
-            @if($search || $period)
-
-                <div class="mt-3">
-
-                    <a
-                        href="{{ route('products.index') }}"
-                        class="btn btn-outline-secondary btn-sm"
-                    >
-                        Reset Filters
-                    </a>
-
-                </div>
-
-            @endif
-
         </form>
+
+
+        <div class="mt-4 pt-3 border-top">
+
+            <div class="d-flex flex-wrap gap-2">
+
+                {{-- CSV --}}
+
+                <a
+                    href="{{ route('products.export', request()->query()) }}"
+                    class="btn btn-success"
+                >
+                    📄 Export CSV
+                </a>
+
+
+                {{-- Missing Records --}}
+
+                @if($missingImages > 0)
+
+                    <form
+                        method="POST"
+                        action="{{ route('products.cleanMissing') }}"
+                        onsubmit="return confirm('Delete all database records whose image files are missing?');"
+                    >
+
+                        @csrf
+
+                        @method('DELETE')
+
+                        <button
+                            type="submit"
+                            class="btn btn-danger"
+                        >
+                            🧹 Clean {{ $missingImages }} Missing
+                        </button>
+
+                    </form>
+
+                @endif
+
+            </div>
+
+        </div>
 
     </div>
 
 
-    {{-- ========================================= --}}
-    {{-- PRODUCT IMAGE MANAGEMENT --}}
-    {{-- ========================================= --}}
+    {{-- ================================================= --}}
+    {{-- RESULTS --}}
+    {{-- ================================================= --}}
 
     <div class="products-card p-4">
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-4">
 
-    <h3 class="section-title mb-0">
-        🖼️ Uploaded Product Images
-    </h3>
+            <div>
 
-    <div class="d-flex align-items-center gap-2">
+                <h3 class="fw-bold mb-1">
+                    🖼️ Uploaded Product Images
+                </h3>
 
-        <span class="badge bg-primary">
+                <span class="text-muted">
+                    Showing {{ $filteredCount }} filtered result(s)
+                </span>
 
-            {{ $products->total() }} Results
+            </div>
 
-        </span>
 
-        <a
-            href="{{ route('products.gallery') }}"
-            class="btn btn-dark btn-sm"
-        >
-            🗂️ Open Image Gallery
-        </a>
+            <div>
 
-    </div>
+                <a
+                    href="{{ route('products.gallery') }}"
+                    class="btn btn-dark btn-sm"
+                >
+                    🗂️ Open Gallery
+                </a>
 
-</div>
+            </div>
+
         </div>
 
 
@@ -580,7 +846,12 @@
 
                         <div class="product-card">
 
-                            @if($product->image)
+                            @if(
+                                $product->image &&
+                                file_exists(
+                                    public_path($product->image)
+                                )
+                            )
 
                                 <img
                                     src="{{ asset($product->image) }}"
@@ -591,9 +862,9 @@
                             @else
 
                                 <div
-                                    class="product-image d-flex align-items-center justify-content-center"
+                                    class="product-image d-flex align-items-center justify-content-center text-danger"
                                 >
-                                    No Image
+                                    ⚠️ Image Missing
                                 </div>
 
                             @endif
@@ -602,10 +873,18 @@
                             <div class="product-content">
 
                                 <div class="product-name">
+
                                     {{ $product->name }}
+
                                 </div>
 
+
                                 <div class="product-date mb-3">
+
+                                    ID:
+                                    {{ $product->id }}
+
+                                    <br>
 
                                     Uploaded:
                                     {{ $product->created_at->format('d M Y, h:i A') }}
@@ -615,7 +894,6 @@
 
                                 <div class="d-flex gap-2">
 
-                                    {{-- Edit --}}
                                     <a
                                         href="{{ route('products.edit', $product) }}"
                                         class="btn btn-warning btn-sm"
@@ -624,11 +902,22 @@
                                     </a>
 
 
-                                    {{-- Delete --}}
+                                    @if($product->image)
+
+                                        <a
+                                            href="{{ route('products.download', $product) }}"
+                                            class="btn btn-success btn-sm"
+                                        >
+                                            📥 Download
+                                        </a>
+
+                                    @endif
+
+
                                     <form
                                         method="POST"
                                         action="{{ route('products.destroy', $product) }}"
-                                        onsubmit="return confirm('Are you sure you want to delete this product and its image?');"
+                                        onsubmit="return confirm('Delete this product and image?');"
                                     >
 
                                         @csrf
@@ -657,10 +946,11 @@
             </div>
 
 
-            {{-- Pagination --}}
-            <div class="d-flex justify-content-center">
+            {{-- Number Pagination --}}
 
-                {{ $products->links('pagination::bootstrap-5') }}
+            <div class="d-flex justify-content-center mt-4">
+
+                {{ $products->onEachSide(2)->links('pagination::bootstrap-5') }}
 
             </div>
 
@@ -673,8 +963,7 @@
                 </h4>
 
                 <p>
-                    Try changing your search or filter,
-                    or upload your first product image.
+                    Try changing your filters or upload an image.
                 </p>
 
             </div>
@@ -689,44 +978,62 @@
 <script>
 
     /*
-     * Image preview before upload.
-     */
-    document
-        .getElementById('imageInput')
-        .addEventListener('change', function(event) {
+    |--------------------------------------------------------------------------
+    | Image Preview
+    |--------------------------------------------------------------------------
+    */
 
-            const file = event.target.files[0];
+    const imageInput =
+        document.getElementById('imageInput');
 
-            const previewContainer =
-                document.getElementById('previewContainer');
+    if (imageInput) {
 
-            const previewImage =
-                document.getElementById('previewImage');
+        imageInput.addEventListener(
+            'change',
+            function(event) {
+
+                const file =
+                    event.target.files[0];
+
+                const previewContainer =
+                    document.getElementById(
+                        'previewContainer'
+                    );
+
+                const previewImage =
+                    document.getElementById(
+                        'previewImage'
+                    );
 
 
-            if (file) {
+                if (file) {
 
-                const reader = new FileReader();
+                    const reader =
+                        new FileReader();
 
-                reader.onload = function(e) {
+                    reader.onload =
+                        function(e) {
 
-                    previewImage.src = e.target.result;
+                            previewImage.src =
+                                e.target.result;
 
-                    previewContainer.style.display = 'block';
+                            previewContainer.style.display =
+                                'block';
+                        };
 
-                };
+                    reader.readAsDataURL(file);
 
-                reader.readAsDataURL(file);
+                } else {
 
-            } else {
+                    previewImage.src = '';
 
-                previewImage.src = '';
-
-                previewContainer.style.display = 'none';
+                    previewContainer.style.display =
+                        'none';
+                }
 
             }
-
-        });
+        );
+    }
 
 </script>
 
